@@ -1,0 +1,126 @@
+import numpy as np
+import pandas as pd
+import pickle
+import matplotlib.pyplot as plt
+
+#Estabelcemos el data frame para la fecha
+print("\nPrograma de perros con PaVTas :D\n")
+fronteras = pd.read_csv('frontera.csv')
+fronteras["Date"] = pd.to_datetime(fronteras["Date"], format="%m/%d/%Y")
+es_2019 = fronteras["Date"].dt.strftime("%Y") == "2019"
+#-------------------------------------------------------------------
+
+#Establecemos el data frame de que estamos en la frontera de Canada
+es_Canada = fronteras["Border"] == "US-Canada Border"
+frontCanada = fronteras[es_Canada & es_2019]
+#------------------------------------------------------------------
+
+#Creamos el data frame con ubicarnos en canada y sea el año 2019
+DataFrameCanada = pd.DataFrame(frontCanada)
+cols_to_subset = ["Port Name", "State", "Date", "Measure", "Value"]
+filtroFinal = DataFrameCanada[cols_to_subset]
+DataFrameFiltro = pd.DataFrame(filtroFinal)
+#print(filtroFinal)
+#--------------------------------------------------------------------
+
+#Creamos las coVTiciones de PVP y PV
+es_PerVehPas = fronteras["Measure"] == "Personal Vehicle Passengers"
+es_PerVeh = fronteras["Measure"] == "Personal Vehicles"
+#--------------------------------------------------------------------
+
+#Creamos las coVTiciones de PD
+es_PD = fronteras["Measure"] == "Pedestrians"
+
+#---------------------------------------------------------------------
+
+#Creación de la ubicación de los estados
+es_VT = fronteras["State"] == "VT"
+
+
+#--------------------------------------------------------------------
+
+#Creamos el DataFrame de VTPVP, VTPV Para el ESTADO DE VT
+frameDePerVTPV = fronteras[es_2019 & es_Canada & es_PerVeh & es_VT]
+DataFrameVTPV = pd.DataFrame(frameDePerVTPV)
+#print(frameDePerVTPV)
+frameDePerVTPVP = fronteras[es_2019 & es_Canada & es_PerVehPas & es_VT]
+DataFrameVTPVP = pd.DataFrame(frameDePerVTPVP)
+#print(frameDePerVTPVP)
+
+
+
+#-------------------------------------------------------------------------
+
+#Cremos el data frame de Pedestrians
+frameDeVTPD = fronteras[es_2019 & es_Canada & es_PD & es_VT]
+DataFrameVTPD = pd.DataFrame(frameDeVTPD)
+#print(DataFrameVTPD)
+
+
+#--------------------------------------------------------------------------
+
+#Gráfica de lineas por estado sin detalles de puertas, que muestra el moviVTento de Personal Vehicles
+#xVTPV=DataFrameVTPV['Date']
+#yVTPV=DataFrameVTPV['Value']
+#plt.plot(xVTPV,yVTPV)
+#plt.show()
+
+
+
+#-------------------------------------------------------------------------------------------------------
+
+#Hacer Gráfica de puntos que muestre el comportaVTento de "Pedestrians". Que sea una gráfica
+#por cada estado y con detalle de puertas en la horizontal
+#xVTPD=frameDePerVTPD['Port Name']
+#yVTPD=frameDePerVTPD['Value']
+#plt.scatter(xVTPD,yVTPD)
+#plt.show()
+
+
+#--------------------------------------------------------------------------------------------------------
+
+#Creamos los data frames con la coVTición de PV y PVP Por estado
+VTPV= DataFrameVTPV[DataFrameVTPV['Measure']=='Personal Vehicles']
+VTPVP= DataFrameVTPVP[DataFrameVTPVP['Measure']=='Personal Vehicle Passengers']
+dfVTPV= pd.DataFrame(VTPV)
+dfVTPVP= pd.DataFrame(VTPVP)
+sumaVTPV = dfVTPV.groupby('Port Name')['Value'].sum()
+sumaVTPVP = dfVTPVP.groupby('Port Name')['Value'].sum()
+dfsumaVTPV= pd.DataFrame(sumaVTPV)
+dfsumaVTPVP= pd.DataFrame(sumaVTPVP)
+
+
+
+#print(dfsumaVTPV)
+#print(dfsumaVTPVP)
+#---------------------------------------------------------------------------------------
+
+#Unimos PV y PVP POR CADA ESTADO dentro de un VTsmo data frame
+JuntosVT= pd.merge(dfsumaVTPV,dfsumaVTPVP,on='Port Name')
+dfJuntosVT=pd.DataFrame(JuntosVT)
+
+
+#print(dfJuntosVT)
+#-----------------------------------------------------------------------------------------
+
+#Graficamos por estado las dos barras en una gráfica
+#JuntosVTx = dfJuntosVT[['Value_x','Value_y']]
+#JuntosVTx.plot.bar()
+#plt.show()
+
+#-----------------------------------------------------------------------------------------
+
+#Histograma de Buss pasengers para todos los estados
+
+es_BP = fronteras["Measure"] == "Bus Passengers"
+frameDeBP = fronteras[es_2019 & es_Canada & es_BP ]
+DataFrameBP = pd.DataFrame(frameDeBP)
+#print(DataFrameBP)
+
+#xBP=DataFrameBP['Value']
+#yBP=DataFrameBP[]
+#plt.hist(xBP)
+#plt.show()
+
+#DataFrameBP['Value'].plot.hist()
+#plt.show()
